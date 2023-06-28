@@ -17,13 +17,13 @@ import User from "../../utils/types/user";
 const UserTable = ({ data, pagination, triggers, components }: any) => {
   const messagePlaceholder = (msg: any) => {
     return (
-      <>
+      <TableRow>
         <TableCell />
         <TableCell />
         <TableCell align="left">{msg}</TableCell>
         <TableCell />
         <TableCell />
-      </>
+      </TableRow>
     );
   };
 
@@ -38,18 +38,19 @@ const UserTable = ({ data, pagination, triggers, components }: any) => {
           <TableRow>
             <TableCell width="20%">First Name</TableCell>
             <TableCell width="20%">Last Name</TableCell>
-            <TableCell width="20%">Email</TableCell>
-            <TableCell width="20%">Date Joined</TableCell>
-            <TableCell width="10%" />
+            <TableCell width="24%">Email</TableCell>
+            <TableCell width="18%">Date Created</TableCell>
+            <TableCell width="18%" />
           </TableRow>
         </TableHead>
         <TableBody>
           {data.isLoading ? (
-            <TableRow>
-              <LoadingPlaceholder />
-            </TableRow>
+            <LoadingPlaceholder />
+          ) : data.error?.length !== 0 ? (
+            <ErrorPlaceholder />
+          ) : data.users?.length === 0 ? (
+            <NoUserPlaceholder />
           ) : (
-            !data.error.length &&
             data.users?.map((user: User, indx: number) => (
               <TableRow key={indx}>
                 <TableCell component="th" scope="row">
@@ -74,17 +75,12 @@ const UserTable = ({ data, pagination, triggers, components }: any) => {
               </TableRow>
             ))
           )}
-          <TableRow>
-            {data.users?.length === 0 && data.error?.length === 0 && (
-              <NoUserPlaceholder />
-            )}
-            {data.error?.length !== 0 && <ErrorPlaceholder />}
-          </TableRow>
+          <TableRow></TableRow>
         </TableBody>
         <TableFooter>
           <TableRow>
             <TablePagination
-              count={pagination.totalCount}
+              count={data.recordCount}
               page={pagination.page}
               rowsPerPage={pagination.size}
               rowsPerPageOptions={[5, 10, 20, 50]}

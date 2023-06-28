@@ -1,6 +1,6 @@
-import { styled, alpha } from "@mui/material/styles";
 import { Box, Toolbar, TextField } from "@mui/material";
 import { Search } from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
 
 const RightToolBar = styled(Toolbar)(() => ({
   display: "flex",
@@ -9,11 +9,6 @@ const RightToolBar = styled(Toolbar)(() => ({
 
 const SearchWrap = styled("div")(({ theme }) => ({
   position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
   display: "flex",
   flexDirection: "row",
   marginLeft: 0,
@@ -45,7 +40,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-const SearchField = ({ searchParam, handleSearchParamChange }: any) => {
+const SearchField = ({ handleSearchParamChange }: any) => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <form onSubmit={handleSearchParamChange}>
@@ -58,7 +53,6 @@ const SearchField = ({ searchParam, handleSearchParamChange }: any) => {
               variant="standard"
               placeholder="Search…"
               inputProps={{ "aria-label": "search" }}
-              defaultValue={searchParam}
               onChange={handleSearchParamChange}
             />
           </SearchWrap>

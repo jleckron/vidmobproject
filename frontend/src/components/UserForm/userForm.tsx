@@ -4,7 +4,7 @@ import { LoadingButton } from "@mui/lab";
 import { Link } from "react-router-dom";
 
 const UserForm = ({ handleOnChange, handleSubmit, data }: any) => {
-  const { form, formErrors, isLoading, message } = data;
+  const { form, formErrors, serviceError, isLoading, message } = data;
   const style = {
     position: "absolute" as "absolute",
     top: "10%",
@@ -39,10 +39,8 @@ const UserForm = ({ handleOnChange, handleSubmit, data }: any) => {
               margin="normal"
               onChange={handleOnChange}
               defaultValue={form?.firstName || null}
-              error={formErrors?.firstName}
-              helperText={
-                formErrors?.firstName && "Name can only include letters"
-              }
+              error={formErrors.firstName.length > 0}
+              helperText={formErrors.firstName}
             />
           </Grid>
           <Grid item xs={6}>
@@ -54,10 +52,8 @@ const UserForm = ({ handleOnChange, handleSubmit, data }: any) => {
               margin="normal"
               onChange={handleOnChange}
               defaultValue={form?.lastName || null}
-              error={formErrors?.lastName}
-              helperText={
-                formErrors?.lastName && "Name can only include letters"
-              }
+              error={formErrors.lastName.length > 0}
+              helperText={formErrors.lastName}
             />
           </Grid>
         </Grid>
@@ -70,9 +66,11 @@ const UserForm = ({ handleOnChange, handleSubmit, data }: any) => {
           margin="normal"
           onChange={handleOnChange}
           defaultValue={form?.email || null}
-          error={formErrors?.email}
-          helperText={formErrors?.email && "Invalid email address"}
+          error={formErrors.email.length > 0}
+          helperText={formErrors.email}
         />
+
+        <Typography color="error">{serviceError}</Typography>
 
         <Box mt={2}>
           <Link to="/">

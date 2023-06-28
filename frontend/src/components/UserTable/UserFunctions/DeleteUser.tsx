@@ -12,7 +12,7 @@ const DeleteUser = ({ user, triggers }: any) => {
 
   const handleModal = () => setIsModalOpen((prevState) => !prevState);
 
-  const handleDelete = async () => {
+  async function handleDelete() {
     setIsLoading(true);
     const url = new URL(ENDPOINTS.LOCAL_URL);
     url.pathname = `/users/${user._id}`;
@@ -27,7 +27,7 @@ const DeleteUser = ({ user, triggers }: any) => {
       setIsLoading(false);
       triggers.reload((prev: boolean) => !prev);
     }
-  };
+  }
 
   const style = {
     position: "absolute" as "absolute",

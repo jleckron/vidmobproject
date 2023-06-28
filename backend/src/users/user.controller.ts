@@ -1,5 +1,6 @@
 import {
   Body,
+  ConflictException,
   Controller,
   Delete,
   Get,
@@ -23,7 +24,16 @@ export class UserController {
 
   @Post()
   async addNewUser(@Body() user: CreateUserDto): Promise<User> {
-    return await this.usersService.addUser(user);
+    let result;
+    try {
+      result = await this.usersService.addUser(user);
+    } catch (error) {
+      throw new ConflictException('Email Already In Use', {
+        cause: error,
+        description: 'Email Already In Use',
+      });
+    }
+    return result;
   }
 
   @Get()
@@ -34,11 +44,20 @@ export class UserController {
   }
 
   @Put(':id')
-  updateUser(
+  async updateUser(
     @Param('id') userId: string,
     @Body() body: UpdateUserDto,
   ): Promise<User> {
-    return this.usersService.updateUser(userId, body);
+    let result;
+    try {
+      result = await this.usersService.updateUser(userId, body);
+    } catch (error) {
+      throw new ConflictException('Email Already In Use', {
+        cause: error,
+        description: 'Email Already In Use',
+      });
+    }
+    return result;
   }
 
   @Delete(':id')

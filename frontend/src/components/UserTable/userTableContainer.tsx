@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { Button, Box } from "@mui/material";
 import Add from "@mui/icons-material/Add";
-import { Link } from "react-router-dom";
 
 import UserTable from "./userTable";
 
@@ -14,27 +14,31 @@ import SearchField from "../SearchField";
 import EditUser from "./UserFunctions/EditUser";
 import DeleteUser from "./UserFunctions/DeleteUser";
 
+interface TableData {
+  users: Array<User>;
+  error: string;
+  isLoading: boolean;
+  recordCount: number;
+}
+
 const UserTableContainer = () => {
-  const [users, setUsers] = useState<Array<User> | null>();
-  const [error, setError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reloadAfterDelete, setReloadAfterDelete] = useState<boolean>(false);
-  const [totalCount, setTotalCount] = useState<number>(0);
   const [tableController, setTableController] = useState({
     search: "",
     page: Number(sessionStorage.getItem("pageNum")) || 0,
     size: Number(sessionStorage.getItem("pageSize")) || 5,
   });
+  const [tableData, setTableData] = useState<TableData>({
+    users: [],
+    error: "",
+    isLoading: true,
+    recordCount: 0,
+  });
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    setIsLoading(true);
-    getAllUsers(abortController);
-    return () => abortController.abort();
-    // eslint-disable-next-line
-  }, [tableController, reloadAfterDelete]);
-
-  //Calls given endpoint with params size/page/search
+  /**
+   * Calls given endpoint with params size/page/search
+   * @param abortController
+   */
   async function getAllUsers(abortController: AbortController) {
     const addParams = {
       size: String(tableController.size),
@@ -49,64 +53,44 @@ const UserTableContainer = () => {
       signal: abortController.signal,
     };
     try {
-      const body = await fetch(url, requestOptions);
+      const result = await fetch(url, requestOptions);
 
-      const { users, count } = await body.json();
+      const { users, count } = await result.json();
       if (users.length === 0 && count) {
         setTableController((prevController) => ({
           ...prevController,
           page: prevController.page - 1,
         }));
       }
-      setUsers(users);
-      setError("");
-      if (totalCount !== count) setTotalCount(count);
-      setIsLoading(false);
+      setTableData((prevData) => ({
+        ...prevData,
+        users: users,
+        error: "",
+        recordCount: count,
+        isLoading: false,
+      }));
     } catch (err: any) {
-      const { code, message } = err;
       //Disregard user abort error caused by double effect firing in react.strictmode / dev
-      if (code !== 20) {
-        setError(message);
-        setIsLoading(false);
+      if (err.code !== 20) {
+        setTableData((prevData) => ({
+          ...prevData,
+          error: err.message,
+          isLoading: false,
+        }));
       }
-    } finally {
-      // setIsLoading(false);
     }
   }
 
-  //Handles control of table page size selection changes
-  const handleTableControl = (event: React.ChangeEvent<HTMLInputElement>) => {
-    sessionStorage.setItem("pageSize", event.target.value);
-    sessionStorage.setItem("pageNum", "0");
-
-    setTableController({
-      ...tableController,
-      page: 0,
-      size: Number(event.target.value),
-    });
-  };
-
-  //Handles control of table page number selection
-  const handleOnPageChange = (
-    _event: React.ChangeEvent<HTMLInputElement>,
-    newPage: number
-  ) => {
-    sessionStorage.setItem("pageNum", String(newPage));
-
-    setTableController((prevController) => {
-      return { ...prevController, page: newPage };
-    });
-  };
-
-  //Handles setting search param from search input on value change
-  const handleSearchParamChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    event.preventDefault();
-    setTableController((prevController) => {
-      return { ...prevController, page: 0, search: event.target.value };
-    });
-  };
+  useEffect(() => {
+    const abortController = new AbortController();
+    setTableData((prevData) => ({
+      ...prevData,
+      isLoading: true,
+    }));
+    getAllUsers(abortController);
+    return () => abortController.abort();
+    // eslint-disable-next-line
+  }, [tableController, reloadAfterDelete]);
 
   return (
     <>
@@ -122,24 +106,65 @@ const UserTableContainer = () => {
             Add User
           </Button>
         </Link>
-        <SearchField
-          searchParam={tableController.search}
-          handleSearchParamChange={handleSearchParamChange}
-        />
+        <SearchField handleSearchParamChange={handleSearchParamChange} />
       </Box>
       <UserTable
-        data={{ users, error, isLoading }}
+        data={tableData}
         pagination={{
           ...tableController,
-          totalCount: totalCount,
-          sizeChange: handleTableControl,
-          pageChange: handleOnPageChange,
+          sizeChange: handlePageSizeChange,
+          pageChange: handlePageNumChange,
         }}
         triggers={{ reload: setReloadAfterDelete }}
         components={[EditUser, DeleteUser]}
       />
     </>
   );
+
+  /**
+   * Handles control of table page number selection
+   * @param _event
+   * @param newPage
+   */
+  function handlePageNumChange(
+    _event: React.ChangeEvent<HTMLInputElement>,
+    newPage: number
+  ) {
+    sessionStorage.setItem("pageNum", String(newPage));
+
+    setTableController((prevController) => ({
+      ...prevController,
+      page: newPage,
+    }));
+  }
+
+  /**
+   * Handles control of table page size selection changes
+   * @param event
+   */
+  function handlePageSizeChange(event: React.ChangeEvent<HTMLInputElement>) {
+    sessionStorage.setItem("pageSize", event.target.value);
+    sessionStorage.setItem("pageNum", "0");
+
+    setTableController({
+      ...tableController,
+      page: 0,
+      size: Number(event.target.value),
+    });
+  }
+
+  /**
+   * Handles setting search param from search input on value change
+   * @param event
+   */
+  function handleSearchParamChange(event: React.ChangeEvent<HTMLInputElement>) {
+    event.preventDefault();
+    setTableController((prevController) => ({
+      ...prevController,
+      page: 0,
+      search: event.target.value,
+    }));
+  }
 };
 
 export default UserTableContainer;

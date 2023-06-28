@@ -11,14 +11,32 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
+  /**
+   * Performs creating a new user
+   * @param user
+   * @returns Promise<User>
+   */
   async addUser(user: User): Promise<User> {
     return await this.userModel.create(user);
   }
 
+  /**
+   * Gets total document count given a set of search paramters
+   * @param searchParam
+   * @returns Promise<User>
+   */
   async getCount(searchParam): Promise<number> {
-    return await this.userModel.find({ ...searchParam }).count();
+    return await this.userModel
+      .find({ ...searchParam })
+      .count()
+      .exec();
   }
 
+  /**
+   * Performs returning a subset of users given a set of search parameters
+   * @param query
+   * @returns Promise<User>
+   */
   async getUsers(query: Query): Promise<{ users: User[]; count: number }> {
     const searchParam = query.search
       ? {
@@ -37,19 +55,36 @@ export class UsersService {
     const users = await this.userModel
       .find({ ...searchParam })
       .limit(resultsPerPage)
-      .skip(skip);
+      .skip(skip)
+      .exec();
     const count = await this.getCount(searchParam);
     return { users, count };
   }
 
+  /**
+   * Performs deletion of user with userId
+   * @param userId
+   * @returns Promise<User>
+   */
   async deleteUser(userId: string): Promise<User> {
-    return await this.userModel.findByIdAndDelete(userId);
+    return await this.userModel.findOneAndDelete({ _id: userId }).exec();
   }
 
+  /**
+   * Updates a user with userId with new user information body
+   * @param userId
+   * @param user
+   * @returns Promise<User>
+   */
   async updateUser(userId: string, user: User): Promise<User> {
-    return await this.userModel.findByIdAndUpdate(userId, user, {
-      new: true,
-      runValidators: true,
-    });
+    return await this.userModel
+      .findOneAndUpdate(
+        { _id: userId },
+        { ...user },
+        {
+          new: true,
+        },
+      )
+      .exec();
   }
 }
