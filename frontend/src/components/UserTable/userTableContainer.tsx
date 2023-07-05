@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { Button, Box } from "@mui/material";
+import { Button, Box, createTheme, IconButton } from "@mui/material";
 import Add from "@mui/icons-material/Add";
 
 import UserTable from "./userTable";
 
 import METHODS from "../../utils/constants/methods";
 import ENDPOINTS from "../../utils/constants/endpoints";
-import User from "../../utils/types/user";
+import User from "../../utils/interfaces/user";
 import SearchField from "../SearchField";
 
-import EditUser from "./UserFunctions/EditUser";
-import DeleteUser from "./UserFunctions/DeleteUser";
+import EditUserButton from "./UserFunctions/EditUserButton";
+import DeleteUserButton from "./UserFunctions/DeleteUserButton";
+import { MoreHoriz } from "@mui/icons-material";
 
 interface TableData {
   users: Array<User>;
@@ -92,6 +93,18 @@ const UserTableContainer = () => {
     // eslint-disable-next-line
   }, [tableController, reloadAfterDelete]);
 
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: "#022cc3",
+      },
+    },
+  });
+
+  const styling = {
+    backgroundColor: theme.palette.primary.main,
+  };
+
   return (
     <>
       <Box
@@ -102,7 +115,12 @@ const UserTableContainer = () => {
         }}
       >
         <Link to="/form">
-          <Button variant="contained" size="large" startIcon={<Add />}>
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<Add />}
+            // sx={styling}
+          >
             Add User
           </Button>
         </Link>
@@ -116,7 +134,7 @@ const UserTableContainer = () => {
           pageChange: handlePageNumChange,
         }}
         triggers={{ reload: setReloadAfterDelete }}
-        components={[EditUser, DeleteUser]}
+        components={[EditUserButton, DeleteUserButton]}
       />
     </>
   );
@@ -127,14 +145,14 @@ const UserTableContainer = () => {
    * @param newPage
    */
   function handlePageNumChange(
-    _event: React.ChangeEvent<HTMLInputElement>,
-    newPage: number
+    _event: React.MouseEvent<HTMLButtonElement> | null,
+    page: number
   ) {
-    sessionStorage.setItem("pageNum", String(newPage));
+    sessionStorage.setItem("pageNum", String(page));
 
     setTableController((prevController) => ({
       ...prevController,
-      page: newPage,
+      page: page,
     }));
   }
 

@@ -1,10 +1,32 @@
+import { ChangeEvent, FormEvent } from "react";
+
 import { Box, TextField, Button, Grid, Typography } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 
 import { Link } from "react-router-dom";
 
-const UserForm = ({ handleOnChange, handleSubmit, data }: any) => {
-  const { form, formErrors, serviceError, isLoading, message } = data;
+import Form from "../../utils/interfaces/form";
+
+interface IUserForm {
+  data: {
+    form: Form;
+    formErrors: {
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+    serviceError: string;
+    isLoading: boolean;
+    title: "Add User" | "Edit User";
+  };
+  handleOnChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}
+
+const UserForm = (props: IUserForm) => {
+  const { data, handleOnChange, handleSubmit } = props;
+  const { form, formErrors, serviceError, isLoading, title } = data;
+
   const style = {
     position: "absolute" as "absolute",
     top: "10%",
@@ -22,12 +44,17 @@ const UserForm = ({ handleOnChange, handleSubmit, data }: any) => {
     for (const val of Object.values(formErrors)) {
       if (val) complete = false;
     }
-    return complete && form?.firstName && form?.lastName && form?.email;
+    return (
+      complete &&
+      form?.firstName?.length > 0 &&
+      form?.lastName?.length > 0 &&
+      form?.email?.length > 0
+    );
   };
 
   return (
     <Box sx={style}>
-      <Typography variant="h3">{message}</Typography>
+      <Typography variant="h3">{title}</Typography>
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={6}>
@@ -38,7 +65,7 @@ const UserForm = ({ handleOnChange, handleSubmit, data }: any) => {
               fullWidth
               margin="normal"
               onChange={handleOnChange}
-              defaultValue={form?.firstName || null}
+              defaultValue={form.firstName || null}
               error={formErrors.firstName.length > 0}
               helperText={formErrors.firstName}
             />
@@ -51,7 +78,7 @@ const UserForm = ({ handleOnChange, handleSubmit, data }: any) => {
               fullWidth
               margin="normal"
               onChange={handleOnChange}
-              defaultValue={form?.lastName || null}
+              defaultValue={form.lastName || null}
               error={formErrors.lastName.length > 0}
               helperText={formErrors.lastName}
             />
@@ -65,7 +92,7 @@ const UserForm = ({ handleOnChange, handleSubmit, data }: any) => {
           fullWidth
           margin="normal"
           onChange={handleOnChange}
-          defaultValue={form?.email || null}
+          defaultValue={form.email || null}
           error={formErrors.email.length > 0}
           helperText={formErrors.email}
         />

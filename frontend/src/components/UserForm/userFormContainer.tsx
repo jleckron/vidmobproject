@@ -1,8 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import UserForm from "./userForm";
-import Form from "../../utils/types/form";
+import Form from "../../utils/interfaces/form";
 import METHODS from "../../utils/constants/methods";
 import ENDPOINTS from "../../utils/constants/endpoints";
 
@@ -52,15 +52,15 @@ const UserFormContainer = () => {
 
   return (
     <UserForm
-      handleOnChange={handleOnChange}
-      handleSubmit={handleSubmit}
       data={{
         form,
         formErrors,
         serviceError,
         isLoading,
-        message: FormMethod === "POST" ? "Add User" : "Edit User",
+        title: FormMethod === "POST" ? "Add User" : "Edit User",
       }}
+      handleOnChange={handleOnChange}
+      handleSubmit={handleSubmit}
     />
   );
 
@@ -79,7 +79,7 @@ const UserFormContainer = () => {
    * Handles events when form is submitted
    * @param event
    */
-  async function handleSubmit(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     sendFormData();
   }

@@ -1,3 +1,5 @@
+import { ChangeEvent, MouseEvent, Dispatch, SetStateAction } from "react";
+
 import {
   ButtonGroup,
   Table,
@@ -12,10 +14,42 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-import User from "../../utils/types/user";
+import User from "../../utils/interfaces/user";
 
-const UserTable = ({ data, pagination, triggers, components }: any) => {
-  const messagePlaceholder = (msg: any) => {
+interface IUserTable {
+  data: {
+    users: User[];
+    error: string;
+    isLoading: boolean;
+    recordCount: number;
+  };
+  pagination: {
+    search: string;
+    page: number;
+    size: number;
+    sizeChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    pageChange: (
+      event: MouseEvent<HTMLButtonElement> | null,
+      page: number
+    ) => void;
+  };
+  triggers: {
+    reload: Dispatch<SetStateAction<boolean>>;
+  };
+  components: Array<
+    (
+      user: any,
+      triggers?: { reload: Dispatch<SetStateAction<boolean>> }
+    ) => JSX.Element
+  >;
+}
+
+const UserTable = (props: IUserTable) => {
+  const { data, pagination, triggers, components } = props;
+  const { users, error, isLoading, recordCount } = data;
+  const { page, size, sizeChange, pageChange } = pagination;
+
+  const messagePlaceholder = (msg: string | JSX.Element) => {
     return (
       <TableRow>
         <TableCell />
@@ -44,18 +78,16 @@ const UserTable = ({ data, pagination, triggers, components }: any) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.isLoading ? (
+          {isLoading ? (
             <LoadingPlaceholder />
-          ) : data.error?.length !== 0 ? (
+          ) : error?.length !== 0 ? (
             <ErrorPlaceholder />
-          ) : data.users?.length === 0 ? (
+          ) : users?.length === 0 ? (
             <NoUserPlaceholder />
           ) : (
-            data.users?.map((user: User, indx: number) => (
+            users?.map((user: User, indx: number) => (
               <TableRow key={indx}>
-                <TableCell component="th" scope="row">
-                  {user.firstName}
-                </TableCell>
+                <TableCell>{user.firstName}</TableCell>
                 <TableCell>{user.lastName}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
@@ -67,7 +99,7 @@ const UserTable = ({ data, pagination, triggers, components }: any) => {
                 </TableCell>
                 <TableCell align="right">
                   <ButtonGroup>
-                    {components.map((Component: any, indx: number) => (
+                    {components.map((Component: Function, indx: number) => (
                       <Component key={indx} user={user} triggers={triggers} />
                     ))}
                   </ButtonGroup>
@@ -80,12 +112,12 @@ const UserTable = ({ data, pagination, triggers, components }: any) => {
         <TableFooter>
           <TableRow>
             <TablePagination
-              count={data.recordCount}
-              page={pagination.page}
-              rowsPerPage={pagination.size}
+              count={recordCount}
+              page={page}
+              rowsPerPage={size}
               rowsPerPageOptions={[5, 10, 20, 50]}
-              onPageChange={pagination.pageChange}
-              onRowsPerPageChange={pagination.sizeChange}
+              onPageChange={pageChange}
+              onRowsPerPageChange={sizeChange}
             />
           </TableRow>
         </TableFooter>

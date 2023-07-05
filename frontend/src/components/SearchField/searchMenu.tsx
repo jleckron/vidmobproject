@@ -1,3 +1,5 @@
+import { ChangeEvent } from "react";
+
 import { Box, Toolbar, TextField } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
@@ -40,10 +42,15 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-const SearchField = ({ handleSearchParamChange }: any) => {
+interface SearchComponentInterface {
+  handleSearchParamChange: (event: ChangeEvent<HTMLInputElement>) => void;
+}
+
+const SearchField = (props: SearchComponentInterface) => {
+  const { handleSearchParamChange } = props;
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <form onSubmit={handleSearchParamChange}>
+      <form>
         <RightToolBar>
           <SearchWrap>
             <SearchIconWrapper>

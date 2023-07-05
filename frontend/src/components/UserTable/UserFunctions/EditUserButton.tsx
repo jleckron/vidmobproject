@@ -1,9 +1,17 @@
+import { useNavigate } from "react-router-dom";
+
 import { IconButton } from "@mui/material";
 import { Edit } from "@mui/icons-material";
 
-import { useNavigate } from "react-router-dom";
+import User from "../../../utils/interfaces/user";
 
-const EditUser = ({ user }: any) => {
+interface IEditUser {
+  user: User;
+}
+
+const EditUserButton = (props: IEditUser) => {
+  const { user } = props;
+
   const navigator = useNavigate();
   const handleClick = () => navigator("/form", { state: { user } });
 
@@ -14,4 +22,4 @@ const EditUser = ({ user }: any) => {
   );
 };
 
-export default EditUser;
+export default EditUserButton;

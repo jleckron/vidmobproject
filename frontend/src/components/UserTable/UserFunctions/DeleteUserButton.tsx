@@ -1,12 +1,22 @@
-import { useState } from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import { IconButton, Modal, Box, Typography, Button } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Delete } from "@mui/icons-material";
 
 import ENDPOINTS from "../../../utils/constants/endpoints";
 import METHODS from "../../../utils/constants/methods";
+import User from "../../../utils/interfaces/user";
 
-const DeleteUser = ({ user, triggers }: any) => {
+interface IDeleteUser {
+  user: User;
+  triggers: {
+    reload: Dispatch<SetStateAction<boolean>>;
+  };
+}
+
+const DeleteUserButton = (props: IDeleteUser) => {
+  const { user, triggers } = props;
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -51,7 +61,7 @@ const DeleteUser = ({ user, triggers }: any) => {
       >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Delete {user.firstName} {user.lastName}?
+            Delete {user.firstName} {user.lastName}
           </Typography>
           <Box mt={2}>
             <Button
@@ -82,4 +92,4 @@ const DeleteUser = ({ user, triggers }: any) => {
   );
 };
 
-export default DeleteUser;
+export default DeleteUserButton;
