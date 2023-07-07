@@ -5,7 +5,6 @@ import { LoadingButton } from "@mui/lab";
 
 import { Link } from "react-router-dom";
 
-import User from "../../utils/interfaces/user";
 import { clearUser } from "../../redux/slices/editableUserSlice";
 import { useAppDispatch } from "../../redux/hooks";
 

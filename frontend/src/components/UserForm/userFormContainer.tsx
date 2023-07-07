@@ -6,7 +6,6 @@ import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import UserForm from "./userForm";
 import METHODS from "../../utils/constants/methods";
 import ENDPOINTS from "../../utils/constants/endpoints";
-import User from "../../utils/interfaces/user";
 
 const UserFormContainer = () => {
   const navigator = useNavigate();

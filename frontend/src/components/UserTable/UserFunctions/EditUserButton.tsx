@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { IconButton } from "@mui/material";
 import { Edit } from "@mui/icons-material";
 
-import User from "../../../utils/interfaces/user";
-
 interface IEditUser {
   user: User;
 }

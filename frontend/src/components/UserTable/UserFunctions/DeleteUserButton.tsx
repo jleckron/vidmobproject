@@ -8,7 +8,6 @@ import { toggleShouldReload } from "../../../redux/slices/tableControlSlice";
 
 import ENDPOINTS from "../../../utils/constants/endpoints";
 import METHODS from "../../../utils/constants/methods";
-import User from "../../../utils/interfaces/user";
 
 interface IDeleteUser {
   user: User;

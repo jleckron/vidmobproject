@@ -9,7 +9,6 @@ import UserTable from "./userTable";
 
 import METHODS from "../../utils/constants/methods";
 import ENDPOINTS from "../../utils/constants/endpoints";
-import User from "../../utils/interfaces/user";
 import SearchField from "../SearchField";
 
 import { setPage } from "../../redux/slices/tableControlSlice";

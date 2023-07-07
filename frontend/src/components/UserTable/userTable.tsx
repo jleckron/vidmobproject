@@ -17,8 +17,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-import User from "../../utils/interfaces/user";
-
 interface IUserTable {
   data: {
     users: User[];
