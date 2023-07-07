@@ -1,5 +1,8 @@
 import { ChangeEvent } from "react";
 
+import { useAppDispatch } from "../../redux/hooks";
+import { updateSearch } from "../../redux/slices/tableControlSlice";
+
 import { Box, Toolbar, TextField } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
@@ -42,12 +45,9 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-interface SearchComponentInterface {
-  handleSearchParamChange: (event: ChangeEvent<HTMLInputElement>) => void;
-}
+const SearchField = () => {
+  const dispatch = useAppDispatch();
 
-const SearchField = (props: SearchComponentInterface) => {
-  const { handleSearchParamChange } = props;
   return (
     <Box sx={{ flexGrow: 1 }}>
       <form>
@@ -60,13 +60,22 @@ const SearchField = (props: SearchComponentInterface) => {
               variant="standard"
               placeholder="Search…"
               inputProps={{ "aria-label": "search" }}
-              onChange={handleSearchParamChange}
+              onChange={setSearchParameter}
             />
           </SearchWrap>
         </RightToolBar>
       </form>
     </Box>
   );
+
+  /**
+   * Handles updating search parameter in redux table controller
+   * @param event
+   */
+  function setSearchParameter(event: ChangeEvent<HTMLInputElement>) {
+    const param = event.target.value;
+    dispatch(updateSearch(param));
+  }
 };
 
 export default SearchField;

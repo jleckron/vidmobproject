@@ -1,7 +1,10 @@
-import { useState, Dispatch, SetStateAction } from "react";
+import { useState } from "react";
+import { useAppDispatch } from "../../../redux/hooks";
 import { IconButton, Modal, Box, Typography, Button } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Delete } from "@mui/icons-material";
+
+import { toggleShouldReload } from "../../../redux/slices/tableControlSlice";
 
 import ENDPOINTS from "../../../utils/constants/endpoints";
 import METHODS from "../../../utils/constants/methods";
@@ -9,16 +12,15 @@ import User from "../../../utils/interfaces/user";
 
 interface IDeleteUser {
   user: User;
-  triggers: {
-    reload: Dispatch<SetStateAction<boolean>>;
-  };
 }
 
 const DeleteUserButton = (props: IDeleteUser) => {
-  const { user, triggers } = props;
+  const { user } = props;
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const dispatch = useAppDispatch();
 
   const handleModal = () => setIsModalOpen((prevState) => !prevState);
 
@@ -35,7 +37,7 @@ const DeleteUserButton = (props: IDeleteUser) => {
       alert(err);
     } finally {
       setIsLoading(false);
-      triggers.reload((prev: boolean) => !prev);
+      dispatch(toggleShouldReload());
     }
   }
 

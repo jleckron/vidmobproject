@@ -5,11 +5,13 @@ import { LoadingButton } from "@mui/lab";
 
 import { Link } from "react-router-dom";
 
-import Form from "../../utils/interfaces/form";
+import User from "../../utils/interfaces/user";
+import { clearUser } from "../../redux/slices/editableUserSlice";
+import { useAppDispatch } from "../../redux/hooks";
 
 interface IUserForm {
   data: {
-    form: Form;
+    userInfo: User;
     formErrors: {
       firstName: string;
       lastName: string;
@@ -25,7 +27,9 @@ interface IUserForm {
 
 const UserForm = (props: IUserForm) => {
   const { data, handleOnChange, handleSubmit } = props;
-  const { form, formErrors, serviceError, isLoading, title } = data;
+  const { userInfo, formErrors, serviceError, isLoading, title } = data;
+
+  const dispatch = useAppDispatch();
 
   const style = {
     position: "absolute" as "absolute",
@@ -46,10 +50,14 @@ const UserForm = (props: IUserForm) => {
     }
     return (
       complete &&
-      form?.firstName?.length > 0 &&
-      form?.lastName?.length > 0 &&
-      form?.email?.length > 0
+      userInfo.firstName?.length > 0 &&
+      userInfo.lastName?.length > 0 &&
+      userInfo.email?.length > 0
     );
+  };
+
+  const handleCancel = () => {
+    dispatch(clearUser());
   };
 
   return (
@@ -65,7 +73,7 @@ const UserForm = (props: IUserForm) => {
               fullWidth
               margin="normal"
               onChange={handleOnChange}
-              defaultValue={form.firstName || null}
+              defaultValue={userInfo.firstName || null}
               error={formErrors.firstName.length > 0}
               helperText={formErrors.firstName}
             />
@@ -78,7 +86,7 @@ const UserForm = (props: IUserForm) => {
               fullWidth
               margin="normal"
               onChange={handleOnChange}
-              defaultValue={form.lastName || null}
+              defaultValue={userInfo.lastName || null}
               error={formErrors.lastName.length > 0}
               helperText={formErrors.lastName}
             />
@@ -92,7 +100,7 @@ const UserForm = (props: IUserForm) => {
           fullWidth
           margin="normal"
           onChange={handleOnChange}
-          defaultValue={form.email || null}
+          defaultValue={userInfo.email || null}
           error={formErrors.email.length > 0}
           helperText={formErrors.email}
         />
@@ -102,6 +110,7 @@ const UserForm = (props: IUserForm) => {
         <Box mt={2}>
           <Link to="/">
             <Button
+              onClick={handleCancel}
               type="button"
               variant="outlined"
               color="primary"

@@ -3,5 +3,4 @@ interface Form {
   lastName: string;
   email: string;
 }
-
-export default Form;
+export default {};

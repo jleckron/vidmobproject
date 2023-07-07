@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
 import { Button, Box, createTheme, IconButton } from "@mui/material";
 import Add from "@mui/icons-material/Add";
@@ -10,6 +11,8 @@ import METHODS from "../../utils/constants/methods";
 import ENDPOINTS from "../../utils/constants/endpoints";
 import User from "../../utils/interfaces/user";
 import SearchField from "../SearchField";
+
+import { setPage } from "../../redux/slices/tableControlSlice";
 
 import EditUserButton from "./UserFunctions/EditUserButton";
 import DeleteUserButton from "./UserFunctions/DeleteUserButton";
@@ -23,12 +26,6 @@ interface TableData {
 }
 
 const UserTableContainer = () => {
-  const [reloadAfterDelete, setReloadAfterDelete] = useState<boolean>(false);
-  const [tableController, setTableController] = useState({
-    search: "",
-    page: Number(sessionStorage.getItem("pageNum")) || 0,
-    size: Number(sessionStorage.getItem("pageSize")) || 5,
-  });
   const [tableData, setTableData] = useState<TableData>({
     users: [],
     error: "",
@@ -36,15 +33,18 @@ const UserTableContainer = () => {
     recordCount: 0,
   });
 
+  const tableControl = useAppSelector((state) => state.tableControl);
+  const dispatch = useAppDispatch();
+
   /**
    * Calls given endpoint with params size/page/search
    * @param abortController
    */
   async function getAllUsers(abortController: AbortController) {
     const addParams = {
-      size: String(tableController.size),
-      page: String(tableController.page),
-      search: tableController.search,
+      size: String(tableControl.size),
+      page: String(tableControl.page),
+      search: tableControl.searchParameter,
     };
     const params = new URLSearchParams([...Object.entries(addParams)]);
     const url = new URL(String(ENDPOINTS.LOCAL_URL) + "?" + params);
@@ -55,20 +55,15 @@ const UserTableContainer = () => {
     };
     try {
       const result = await fetch(url, requestOptions);
-
       const { users, count } = await result.json();
-      if (users.length === 0 && count) {
-        setTableController((prevController) => ({
-          ...prevController,
-          page: prevController.page - 1,
-        }));
-      }
+
+      if (users.length === 0 && count) dispatch(setPage(0));
       setTableData((prevData) => ({
         ...prevData,
         users: users,
         error: "",
-        recordCount: count,
         isLoading: false,
+        recordCount: count,
       }));
     } catch (err: any) {
       //Disregard user abort error caused by double effect firing in react.strictmode / dev
@@ -77,6 +72,7 @@ const UserTableContainer = () => {
           ...prevData,
           error: err.message,
           isLoading: false,
+          recordCount: 0,
         }));
       }
     }
@@ -91,7 +87,7 @@ const UserTableContainer = () => {
     getAllUsers(abortController);
     return () => abortController.abort();
     // eslint-disable-next-line
-  }, [tableController, reloadAfterDelete]);
+  }, [tableControl]);
 
   const theme = createTheme({
     palette: {
@@ -124,65 +120,14 @@ const UserTableContainer = () => {
             Add User
           </Button>
         </Link>
-        <SearchField handleSearchParamChange={handleSearchParamChange} />
+        <SearchField />
       </Box>
       <UserTable
         data={tableData}
-        pagination={{
-          ...tableController,
-          sizeChange: handlePageSizeChange,
-          pageChange: handlePageNumChange,
-        }}
-        triggers={{ reload: setReloadAfterDelete }}
         components={[EditUserButton, DeleteUserButton]}
       />
     </>
   );
-
-  /**
-   * Handles control of table page number selection
-   * @param _event
-   * @param newPage
-   */
-  function handlePageNumChange(
-    _event: React.MouseEvent<HTMLButtonElement> | null,
-    page: number
-  ) {
-    sessionStorage.setItem("pageNum", String(page));
-
-    setTableController((prevController) => ({
-      ...prevController,
-      page: page,
-    }));
-  }
-
-  /**
-   * Handles control of table page size selection changes
-   * @param event
-   */
-  function handlePageSizeChange(event: React.ChangeEvent<HTMLInputElement>) {
-    sessionStorage.setItem("pageSize", event.target.value);
-    sessionStorage.setItem("pageNum", "0");
-
-    setTableController({
-      ...tableController,
-      page: 0,
-      size: Number(event.target.value),
-    });
-  }
-
-  /**
-   * Handles setting search param from search input on value change
-   * @param event
-   */
-  function handleSearchParamChange(event: React.ChangeEvent<HTMLInputElement>) {
-    event.preventDefault();
-    setTableController((prevController) => ({
-      ...prevController,
-      page: 0,
-      search: event.target.value,
-    }));
-  }
 };
 
 export default UserTableContainer;

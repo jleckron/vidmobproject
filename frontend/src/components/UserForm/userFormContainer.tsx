@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+
 import UserForm from "./userForm";
-import Form from "../../utils/interfaces/form";
 import METHODS from "../../utils/constants/methods";
 import ENDPOINTS from "../../utils/constants/endpoints";
+import User from "../../utils/interfaces/user";
 
 const UserFormContainer = () => {
   const navigator = useNavigate();
   const { state } = useLocation();
+
   const FormMethod = state === null ? "POST" : "PUT";
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [form, setForm] = useState<Form>(state?.user || {});
+  const [userInfo, setUserInfo] = useState<User>(state?.user || {});
   const [formErrors, setFormErrors] = useState({
     firstName: "",
     lastName: "",
@@ -30,7 +33,7 @@ const UserFormContainer = () => {
     if (FormMethod !== "POST") url.pathname = `/users/${state.user._id}`;
     const requestOptions = {
       ...METHODS[FormMethod],
-      body: JSON.stringify(form),
+      body: JSON.stringify(userInfo),
     };
 
     try {
@@ -53,7 +56,7 @@ const UserFormContainer = () => {
   return (
     <UserForm
       data={{
-        form,
+        userInfo,
         formErrors,
         serviceError,
         isLoading,
@@ -72,7 +75,9 @@ const UserFormContainer = () => {
     event.preventDefault();
     const action = event.target.id;
     validateFormOnChange(event);
-    setForm((prevForm): any => ({ ...prevForm, [action]: event.target.value }));
+    setUserInfo(
+      (prevUser): User => ({ ...prevUser, [action]: event.target.value })
+    );
   }
 
   /**

@@ -1,4 +1,7 @@
 import { ChangeEvent, MouseEvent, Dispatch, SetStateAction } from "react";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+
+import { setPage, setSize } from "../../redux/slices/tableControlSlice";
 
 import {
   ButtonGroup,
@@ -23,31 +26,15 @@ interface IUserTable {
     isLoading: boolean;
     recordCount: number;
   };
-  pagination: {
-    search: string;
-    page: number;
-    size: number;
-    sizeChange: (event: ChangeEvent<HTMLInputElement>) => void;
-    pageChange: (
-      event: MouseEvent<HTMLButtonElement> | null,
-      page: number
-    ) => void;
-  };
-  triggers: {
-    reload: Dispatch<SetStateAction<boolean>>;
-  };
-  components: Array<
-    (
-      user: any,
-      triggers?: { reload: Dispatch<SetStateAction<boolean>> }
-    ) => JSX.Element
-  >;
+  components: Function[];
 }
 
 const UserTable = (props: IUserTable) => {
-  const { data, pagination, triggers, components } = props;
+  const { data, components } = props;
   const { users, error, isLoading, recordCount } = data;
-  const { page, size, sizeChange, pageChange } = pagination;
+
+  const dispatch = useAppDispatch();
+  const { page, size } = useAppSelector((state) => state.tableControl);
 
   const messagePlaceholder = (msg: string | JSX.Element) => {
     return (
@@ -99,8 +86,8 @@ const UserTable = (props: IUserTable) => {
                 </TableCell>
                 <TableCell align="right">
                   <ButtonGroup>
-                    {components.map((Component: Function, indx: number) => (
-                      <Component key={indx} user={user} triggers={triggers} />
+                    {components.map((Component: any, indx: number) => (
+                      <Component key={indx} user={user} />
                     ))}
                   </ButtonGroup>
                 </TableCell>
@@ -116,14 +103,34 @@ const UserTable = (props: IUserTable) => {
               page={page}
               rowsPerPage={size}
               rowsPerPageOptions={[5, 10, 20, 50]}
-              onPageChange={pageChange}
-              onRowsPerPageChange={sizeChange}
+              onPageChange={dispatchPageUpdate}
+              onRowsPerPageChange={dispatchSizeUpdate}
             />
           </TableRow>
         </TableFooter>
       </Table>
     </TableContainer>
   );
+
+  /**
+   * Dispatches new page number to redux table controller
+   * @param _event
+   * @param page
+   */
+  function dispatchPageUpdate(
+    _event: MouseEvent<HTMLButtonElement> | null,
+    page: number
+  ) {
+    dispatch(setPage(page));
+  }
+
+  /**
+   * Dispatches new page size to redux table controller
+   * @param event
+   */
+  function dispatchSizeUpdate(event: ChangeEvent<HTMLInputElement>) {
+    dispatch(setSize(event.target.value));
+  }
 };
 
 export default UserTable;
