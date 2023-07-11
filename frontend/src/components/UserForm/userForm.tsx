@@ -5,29 +5,23 @@ import { LoadingButton } from "@mui/lab";
 
 import { Link } from "react-router-dom";
 
-import { clearUser } from "../../redux/slices/editableUserSlice";
-import { useAppDispatch } from "../../redux/hooks";
+import { clearForm, updateUserField } from "../../redux/slices/userFormSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
 interface IUserForm {
   data: {
-    userInfo: User;
-    formErrors: {
-      firstName: string;
-      lastName: string;
-      email: string;
-    };
     serviceError: string;
     isLoading: boolean;
     title: "Add User" | "Edit User";
   };
-  handleOnChange: (event: ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
 
 const UserForm = (props: IUserForm) => {
-  const { data, handleOnChange, handleSubmit } = props;
-  const { userInfo, formErrors, serviceError, isLoading, title } = data;
+  const { data, handleSubmit } = props;
+  const { serviceError, isLoading, title } = data;
 
+  const { user, formErrors } = useAppSelector((state) => state.userForm);
   const dispatch = useAppDispatch();
 
   const style = {
@@ -47,16 +41,22 @@ const UserForm = (props: IUserForm) => {
     for (const val of Object.values(formErrors)) {
       if (val) complete = false;
     }
+
     return (
       complete &&
-      userInfo.firstName?.length > 0 &&
-      userInfo.lastName?.length > 0 &&
-      userInfo.email?.length > 0
+      user.firstName?.length > 0 &&
+      user.lastName?.length > 0 &&
+      user.email?.length > 0
     );
   };
 
+  const handleOnChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const field = event.target.id;
+    dispatch(updateUserField({ field, value: event.target.value }));
+  };
+
   const handleCancel = () => {
-    dispatch(clearUser());
+    dispatch(clearForm());
   };
 
   return (
@@ -72,7 +72,7 @@ const UserForm = (props: IUserForm) => {
               fullWidth
               margin="normal"
               onChange={handleOnChange}
-              defaultValue={userInfo.firstName || null}
+              defaultValue={user.firstName || null}
               error={formErrors.firstName.length > 0}
               helperText={formErrors.firstName}
             />
@@ -85,7 +85,7 @@ const UserForm = (props: IUserForm) => {
               fullWidth
               margin="normal"
               onChange={handleOnChange}
-              defaultValue={userInfo.lastName || null}
+              defaultValue={user.lastName || null}
               error={formErrors.lastName.length > 0}
               helperText={formErrors.lastName}
             />
@@ -99,7 +99,7 @@ const UserForm = (props: IUserForm) => {
           fullWidth
           margin="normal"
           onChange={handleOnChange}
-          defaultValue={userInfo.email || null}
+          defaultValue={user.email || null}
           error={formErrors.email.length > 0}
           helperText={formErrors.email}
         />
@@ -136,3 +136,4 @@ const UserForm = (props: IUserForm) => {
 };
 
 export default UserForm;
+export type { IUserForm };

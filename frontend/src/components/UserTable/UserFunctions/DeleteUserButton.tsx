@@ -59,6 +59,7 @@ const DeleteUserButton = (props: IDeleteUser) => {
         onClose={handleModal}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+        role="dialog"
       >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
@@ -77,6 +78,8 @@ const DeleteUserButton = (props: IDeleteUser) => {
               variant="contained"
               color="error"
               loading={isLoading}
+              role="button"
+              name="delete"
             >
               <span>Delete</span>
             </LoadingButton>
@@ -86,6 +89,7 @@ const DeleteUserButton = (props: IDeleteUser) => {
       <IconButton
         onClick={handleModal}
         sx={{ "&:hover": { color: "#d32f2f" } }}
+        role="button"
       >
         <Delete />
       </IconButton>

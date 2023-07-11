@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
-import { Button, Box, createTheme, IconButton } from "@mui/material";
+import {
+  Button,
+  Box,
+  // createTheme, IconButton
+} from "@mui/material";
 import Add from "@mui/icons-material/Add";
 
 import UserTable from "./userTable";
@@ -15,7 +19,7 @@ import { setPage } from "../../redux/slices/tableControlSlice";
 
 import EditUserButton from "./UserFunctions/EditUserButton";
 import DeleteUserButton from "./UserFunctions/DeleteUserButton";
-import { MoreHoriz } from "@mui/icons-material";
+// import { MoreHoriz } from "@mui/icons-material";
 
 interface TableData {
   users: Array<User>;
@@ -64,12 +68,15 @@ const UserTableContainer = () => {
         isLoading: false,
         recordCount: count,
       }));
-    } catch (err: any) {
+    } catch (err) {
       //Disregard user abort error caused by double effect firing in react.strictmode / dev
-      if (err.code !== 20) {
+      if (
+        err instanceof Error &&
+        err.message !== "The user aborted a request."
+      ) {
         setTableData((prevData) => ({
           ...prevData,
-          error: err.message,
+          error: (err as Error).message,
           isLoading: false,
           recordCount: 0,
         }));
@@ -88,17 +95,16 @@ const UserTableContainer = () => {
     // eslint-disable-next-line
   }, [tableControl]);
 
-  const theme = createTheme({
-    palette: {
-      primary: {
-        main: "#022cc3",
-      },
-    },
-  });
-
-  const styling = {
-    backgroundColor: theme.palette.primary.main,
-  };
+  // const theme = createTheme({
+  //   palette: {
+  //     primary: {
+  //       main: "#022cc3",
+  //     },
+  //   },
+  // });
+  // const styling = {
+  //   backgroundColor: theme.palette.primary.main,
+  // };
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEvent, Dispatch, SetStateAction } from "react";
+import { ChangeEvent, MouseEvent } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
 import { setPage, setSize } from "../../redux/slices/tableControlSlice";
@@ -132,3 +132,4 @@ const UserTable = (props: IUserTable) => {
 };
 
 export default UserTable;
+export type { IUserTable };

@@ -1,12 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 
 import tableControlSlice from "./slices/tableControlSlice";
-import editableUserSlice from "./slices/editableUserSlice";
+import userFormSlice from "./slices/userFormSlice";
 
 const store = configureStore({
   reducer: {
     tableControl: tableControlSlice,
-    editableUser: editableUserSlice,
+    userForm: userFormSlice,
   },
 });
 
