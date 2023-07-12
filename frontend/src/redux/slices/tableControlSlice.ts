@@ -16,7 +16,6 @@ export const tableControlSlice = createSlice({
       state.size = action.payload;
       state.page = 0;
     },
-
     updateSearch(state, action) {
       state.searchParameter = action.payload;
     },
