@@ -7,7 +7,7 @@ Find source files in backend/src/users
 ###### To Start:
 
 1. cd into /vidmobproject/backend/
-2. npm run start:dev
+2. nest start
 
 ###### Or:
 

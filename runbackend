@@ -1,3 +1,3 @@
 #! /bin/bash
 
-cd backend && npm install && npm run start:dev
+cd backend && npm install &&  nest start
