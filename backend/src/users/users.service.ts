@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, SortOrder } from 'mongoose';
 import { Query } from 'express-serve-static-core';
 
 import { User } from './schemas/user.schema';
@@ -28,7 +28,7 @@ export class UsersService {
   async getCount(searchParam): Promise<number> {
     return await this.userModel
       .find({ ...searchParam })
-      .count()
+      .countDocuments()
       .exec();
   }
 
@@ -51,9 +51,12 @@ export class UsersService {
     const resultsPerPage = Number(query.size);
     const currentPage = Number(query.page);
     const skip = resultsPerPage * currentPage;
+    const sortBy = query.sortBy as string;
+    const order = query.order as SortOrder;
 
     const users = await this.userModel
       .find({ ...searchParam })
+      .sort([[sortBy, order]])
       .limit(resultsPerPage)
       .skip(skip)
       .exec();
