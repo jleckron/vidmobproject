@@ -1,7 +1,12 @@
 import { ChangeEvent, MouseEvent } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
-import { setPage, setSize } from "../../redux/slices/tableControlSlice";
+import {
+  setPage,
+  setSize,
+  setSortColumn,
+  setSortOrder,
+} from "../../redux/slices/tableControlSlice";
 
 import {
   ButtonGroup,
@@ -15,7 +20,10 @@ import {
   TablePagination,
   Paper,
   CircularProgress,
+  TableSortLabel,
+  Box,
 } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 
 interface IUserTable {
   data: {
@@ -26,13 +34,29 @@ interface IUserTable {
   };
   components: Function[];
 }
+type Order = "asc" | "desc";
+const headCells = [
+  { label: "First Name", id: "firstName", width: "20%" },
+  { label: "Last Name", id: "lastName", width: "20%" },
+  { label: "Email", id: "email", width: "24%" },
+  { label: "Date Created", id: "createdAt", width: "18%" },
+  { label: "", id: "", width: "18%" },
+];
 
 const UserTable = (props: IUserTable) => {
   const { data, components } = props;
   const { users, error, isLoading, recordCount } = data;
 
   const dispatch = useAppDispatch();
-  const { page, size } = useAppSelector((state) => state.tableControl);
+  const { page, size, sortBy, order } = useAppSelector(
+    (state) => state.tableControl
+  );
+
+  const handleRequestSort = (_event: MouseEvent<unknown>, property: string) => {
+    const isAsc = sortBy === property && order === "asc";
+    dispatch(setSortOrder(isAsc ? "desc" : "asc"));
+    dispatch(setSortColumn(property));
+  };
 
   const messagePlaceholder = (msg: string | JSX.Element) => {
     return (
@@ -45,7 +69,6 @@ const UserTable = (props: IUserTable) => {
       </TableRow>
     );
   };
-
   const ErrorPlaceholder = () => messagePlaceholder("Error getting users");
   const NoUserPlaceholder = () => messagePlaceholder("No Users");
   const LoadingPlaceholder = () => messagePlaceholder(<CircularProgress />);
@@ -53,15 +76,12 @@ const UserTable = (props: IUserTable) => {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell width="20%">First Name</TableCell>
-            <TableCell width="20%">Last Name</TableCell>
-            <TableCell width="24%">Email</TableCell>
-            <TableCell width="18%">Date Created</TableCell>
-            <TableCell width="18%" />
-          </TableRow>
-        </TableHead>
+        <EnhancedTableHead
+          order={order as Order}
+          orderBy={sortBy}
+          onRequestSort={handleRequestSort}
+          rowCount={5}
+        />
         <TableBody>
           {isLoading ? (
             <LoadingPlaceholder />
@@ -130,6 +150,52 @@ const UserTable = (props: IUserTable) => {
     dispatch(setSize(event.target.value));
   }
 };
+
+/**
+ * DEFINE ENHANCED TABLE HEADER WITH SORTING FROM MUI TABLE EXAMLE
+ */
+
+interface EnhancedTableProps {
+  onRequestSort: (event: React.MouseEvent<unknown>, property: string) => void;
+  order: Order;
+  orderBy: string;
+  rowCount: number;
+}
+
+function EnhancedTableHead(props: EnhancedTableProps) {
+  const { order, orderBy, onRequestSort } = props;
+  const createSortHandler =
+    (property: string) => (event: React.MouseEvent<unknown>) => {
+      onRequestSort(event, property);
+    };
+
+  return (
+    <TableHead>
+      <TableRow>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            sortDirection={orderBy === headCell.id ? order : false}
+            width={headCell.width}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : "asc"}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === "desc" ? "sorted descending" : "sorted ascending"}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
 
 export default UserTable;
 export type { IUserTable };

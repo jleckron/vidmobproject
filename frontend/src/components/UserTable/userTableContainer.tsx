@@ -48,6 +48,8 @@ const UserTableContainer = () => {
       size: String(tableControl.size),
       page: String(tableControl.page),
       search: tableControl.searchParameter,
+      sortBy: tableControl.sortBy,
+      order: tableControl.order,
     };
     const params = new URLSearchParams([...Object.entries(addParams)]);
     const url = new URL(String(ENDPOINTS.LOCAL_URL) + "?" + params);
