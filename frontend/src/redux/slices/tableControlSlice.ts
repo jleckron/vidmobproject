@@ -7,6 +7,8 @@ export const tableControlSlice = createSlice({
     size: 5,
     searchParameter: "",
     shouldReload: false,
+    sortBy: "createdAt",
+    order: "asc",
   },
   reducers: {
     setPage(state, action) {
@@ -15,6 +17,12 @@ export const tableControlSlice = createSlice({
     setSize(state, action) {
       state.size = action.payload;
       state.page = 0;
+    },
+    setSortColumn(state, action) {
+      state.sortBy = action.payload;
+    },
+    setSortOrder(state, action) {
+      state.order = action.payload;
     },
     updateSearch(state, action) {
       state.searchParameter = action.payload;
@@ -25,7 +33,13 @@ export const tableControlSlice = createSlice({
   },
 });
 
-export const { setPage, setSize, updateSearch, toggleShouldReload } =
-  tableControlSlice.actions;
+export const {
+  setPage,
+  setSize,
+  setSortColumn,
+  setSortOrder,
+  updateSearch,
+  toggleShouldReload,
+} = tableControlSlice.actions;
 
 export default tableControlSlice.reducer;
