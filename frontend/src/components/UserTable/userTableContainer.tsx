@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useAppSelector } from "../../redux/hooks";
+
+import { gql, useQuery as useApolloQuery } from "@apollo/client";
 
 import {
   Button,
@@ -15,86 +17,97 @@ import METHODS from "../../utils/constants/methods";
 import ENDPOINTS from "../../utils/constants/endpoints";
 import SearchField from "../SearchField";
 
-import { setPage } from "../../redux/slices/tableControlSlice";
-
 import EditUserButton from "./UserFunctions/EditUserButton";
 import DeleteUserButton from "./UserFunctions/DeleteUserButton";
+import { useGet } from "../../hooks/useFetch";
 // import { MoreHoriz } from "@mui/icons-material";
 
-interface TableData {
-  users: Array<User>;
-  error: string;
-  isLoading: boolean;
-  recordCount: number;
-}
-
 const UserTableContainer = () => {
-  const [tableData, setTableData] = useState<TableData>({
-    users: [],
-    error: "",
-    isLoading: true,
-    recordCount: 0,
-  });
-
   const tableControl = useAppSelector((state) => state.tableControl);
-  const dispatch = useAppDispatch();
 
   /**
-   * Calls given endpoint with params size/page/search
-   * @param abortController
+   * Setup query for REST/HTTP endpoint and init hook values
    */
-  async function getAllUsers(abortController: AbortController) {
-    const addParams = {
-      size: String(tableControl.size),
-      page: String(tableControl.page),
+  const addParams = {
+    size: String(tableControl.size),
+    page: String(tableControl.page),
+    search: tableControl.searchParameter,
+    sortBy: tableControl.sortBy,
+    order: tableControl.order,
+  };
+  const params = new URLSearchParams([...Object.entries(addParams)]);
+  const url = new URL(String(ENDPOINTS.LOCAL_URL) + "?" + params);
+
+  const { data, isLoading, error, execute } = useGet({
+    url,
+    ...METHODS.GET,
+  });
+
+  const tableProps = {
+    users: data?.users || [],
+    count: data?.count || 0,
+    isLoading,
+    error,
+  };
+
+  /**
+   * End of REST/HTTP setup
+   */
+
+  /**
+   * Setup query for GraphQL endpoint
+   */
+  const GQL_USERS = gql`
+    query GetUsers(
+      $page: Int!
+      $size: Int!
+      $sortBy: String!
+      $order: String!
+      $search: String!
+    ) {
+      users(
+        page: $page
+        size: $size
+        sortBy: $sortBy
+        order: $order
+        search: $search
+      ) {
+        _id
+        firstName
+        lastName
+        email
+        createdAt
+        updatedAt
+      }
+      count(search: $search)
+    }
+  `;
+
+  const GQL_Data = useApolloQuery(GQL_USERS, {
+    variables: {
+      size: tableControl.size,
+      page: tableControl.page,
       search: tableControl.searchParameter,
       sortBy: tableControl.sortBy,
       order: tableControl.order,
-    };
-    const params = new URLSearchParams([...Object.entries(addParams)]);
-    const url = new URL(String(ENDPOINTS.LOCAL_URL) + "?" + params);
+    },
+  });
 
-    const requestOptions = {
-      ...METHODS.GET,
-      signal: abortController.signal,
-    };
-    try {
-      const result = await fetch(url, requestOptions);
-      const { users, count } = await result.json();
+  const GQL_tableprops = {
+    users: GQL_Data.data?.users,
+    count: GQL_Data.data?.count || 0,
+    isLoading: GQL_Data.loading,
+    error: GQL_Data.error as Error,
+  };
+  /**
+   * End of GraphQL setup
+   */
 
-      if (users.length === 0 && count) dispatch(setPage(0));
-      setTableData((prevData) => ({
-        ...prevData,
-        users: users,
-        error: "",
-        isLoading: false,
-        recordCount: count,
-      }));
-    } catch (err) {
-      //Disregard user abort error caused by double effect firing in react.strictmode / dev
-      if (
-        err instanceof Error &&
-        err.message !== "The user aborted a request."
-      ) {
-        setTableData((prevData) => ({
-          ...prevData,
-          error: (err as Error).message,
-          isLoading: false,
-          recordCount: 0,
-        }));
-      }
-    }
-  }
-
+  /**
+   * Update response data in hook when table control is changed
+   */
   useEffect(() => {
-    const abortController = new AbortController();
-    setTableData((prevData) => ({
-      ...prevData,
-      isLoading: true,
-    }));
-    getAllUsers(abortController);
-    return () => abortController.abort();
-    // eslint-disable-next-line
+    // execute();
   }, [tableControl]);
 
   // const theme = createTheme({
@@ -130,7 +143,7 @@ const UserTableContainer = () => {
         <SearchField />
       </Box>
       <UserTable
-        data={tableData}
+        data={GQL_tableprops}
         components={[EditUserButton, DeleteUserButton]}
       />
     </>

@@ -24,16 +24,14 @@ export class UserController {
 
   @Post()
   async addNewUser(@Body() user: CreateUserDto): Promise<User> {
-    let result;
     try {
-      result = await this.usersService.addUser(user);
+      return await this.usersService.addUser(user);
     } catch (error) {
       throw new ConflictException('Email Already In Use', {
         cause: error,
         description: 'Email Already In Use',
       });
     }
-    return result;
   }
 
   @Get()
@@ -48,16 +46,14 @@ export class UserController {
     @Param('id') userId: string,
     @Body() body: UpdateUserDto,
   ): Promise<User> {
-    let result;
     try {
-      result = await this.usersService.updateUser(userId, body);
+      return await this.usersService.updateUser(userId, body);
     } catch (error) {
       throw new ConflictException('Email Already In Use', {
         cause: error,
         description: 'Email Already In Use',
       });
     }
-    return result;
   }
 
   @Delete(':id')

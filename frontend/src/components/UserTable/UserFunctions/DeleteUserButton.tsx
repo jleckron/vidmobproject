@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch } from "../../../redux/hooks";
 import { IconButton, Modal, Box, Typography, Button } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
@@ -7,6 +7,7 @@ import { Delete } from "@mui/icons-material";
 import { toggleShouldReload } from "../../../redux/slices/tableControlSlice";
 
 import ENDPOINTS from "../../../utils/constants/endpoints";
+import { usePost } from "../../../hooks/useFetch";
 import METHODS from "../../../utils/constants/methods";
 
 interface IDeleteUser {
@@ -16,29 +17,34 @@ interface IDeleteUser {
 const DeleteUserButton = (props: IDeleteUser) => {
   const { user } = props;
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
 
   const handleModal = () => setIsModalOpen((prevState) => !prevState);
 
-  async function handleDelete() {
-    setIsLoading(true);
-    const url = new URL(ENDPOINTS.LOCAL_URL);
-    url.pathname = `/users/${user._id}`;
-    const requestOptions = {
-      ...METHODS.DELETE,
-    };
-    try {
-      await fetch(url, requestOptions);
-    } catch (err) {
-      alert(err);
-    } finally {
-      setIsLoading(false);
+  const url = new URL(ENDPOINTS.LOCAL_URL);
+  url.pathname = `/users/${user._id}`;
+  const { response, isLoading, error, execute } = usePost({
+    url,
+    ...METHODS.DELETE,
+  });
+
+  /**
+   * Fire delete request in hook
+   */
+  function handleDelete() {
+    execute();
+  }
+
+  /**
+   * Reload user table if delete successful
+   */
+  useEffect(() => {
+    if (response?.ok) {
       dispatch(toggleShouldReload());
     }
-  }
+  }, [response, dispatch]);
 
   const style = {
     position: "absolute" as "absolute",
@@ -63,7 +69,7 @@ const DeleteUserButton = (props: IDeleteUser) => {
       >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Delete {user.firstName} {user.lastName}
+            Delete {user.firstName} {user.lastName}?
           </Typography>
           <Box mt={2}>
             <Button
@@ -71,7 +77,7 @@ const DeleteUserButton = (props: IDeleteUser) => {
               onClick={handleModal}
               disabled={isLoading}
             >
-              Let them stay
+              Cancel
             </Button>
             <LoadingButton
               onClick={handleDelete}
@@ -83,6 +89,9 @@ const DeleteUserButton = (props: IDeleteUser) => {
             >
               <span>Delete</span>
             </LoadingButton>
+            {error && (
+              <Typography color="error">Error deleting user </Typography>
+            )}
           </Box>
         </Box>
       </Modal>

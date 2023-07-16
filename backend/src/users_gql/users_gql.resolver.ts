@@ -3,14 +3,20 @@ import { UsersGQLService } from './users_gql.service';
 import { UserGQL } from './models/user_gql.model';
 import { CreateUserGQLInput } from './dto/create-usergql.input';
 import { UpdateUserGQLInput } from './dto/update-usergql.input';
+import { FetchUsersArgs } from './dto/fetch-users.input';
 
 @Resolver(() => UserGQL)
 export class UsersGQLResolver {
   constructor(private readonly usersGQLService: UsersGQLService) {}
 
-  @Query(() => [UserGQL])
-  async users(): Promise<UserGQL[]> {
-    return await this.usersGQLService.findAll();
+  @Query(() => Number, { name: 'count' })
+  async getCount(@Args('search') search: string): Promise<number> {
+    return await this.usersGQLService.getCount(search);
+  }
+
+  @Query(() => [UserGQL], { name: 'users' })
+  async getUsers(@Args() args: FetchUsersArgs): Promise<UserGQL[]> {
+    return await this.usersGQLService.findAll(args);
   }
 
   @Mutation(() => UserGQL)

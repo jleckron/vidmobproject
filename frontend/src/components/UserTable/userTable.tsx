@@ -28,9 +28,9 @@ import { visuallyHidden } from "@mui/utils";
 interface IUserTable {
   data: {
     users: User[];
-    error: string;
+    error: Error | null;
     isLoading: boolean;
-    recordCount: number;
+    count: number;
   };
   components: Function[];
 }
@@ -45,7 +45,7 @@ const headCells = [
 
 const UserTable = (props: IUserTable) => {
   const { data, components } = props;
-  const { users, error, isLoading, recordCount } = data;
+  const { users, error, isLoading, count } = data;
 
   const dispatch = useAppDispatch();
   const { page, size, sortBy, order } = useAppSelector(
@@ -85,7 +85,7 @@ const UserTable = (props: IUserTable) => {
         <TableBody>
           {isLoading ? (
             <LoadingPlaceholder />
-          ) : error?.length !== 0 ? (
+          ) : error ? (
             <ErrorPlaceholder />
           ) : users?.length === 0 ? (
             <NoUserPlaceholder />
@@ -117,7 +117,7 @@ const UserTable = (props: IUserTable) => {
         <TableFooter>
           <TableRow>
             <TablePagination
-              count={recordCount}
+              count={count}
               page={page}
               rowsPerPage={size}
               rowsPerPageOptions={[5, 10, 20, 50]}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
@@ -10,6 +10,7 @@ import {
   clearForm,
   updateFormErrorField,
 } from "../../redux/slices/userFormSlice";
+import { usePost } from "../../hooks/useFetch";
 
 const UserFormContainer = () => {
   const navigator = useNavigate();
@@ -20,49 +21,55 @@ const UserFormContainer = () => {
 
   const FormMethod = route.state?.edit ? "PUT" : "POST";
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [serviceError, setServiceError] = useState<string>("");
+  if (FormMethod === "PUT" && user._id === 0) {
+    dispatch(clearForm());
+    navigator("/");
+  }
+
+  const serviceError = useRef({ value: "" });
+
+  let url = new URL(ENDPOINTS.LOCAL_URL);
+
+  if (FormMethod !== "POST") url.pathname = `/users/${user._id}`;
+  const { firstName, lastName, email } = user;
+  const formData = {
+    firstName,
+    lastName,
+    email,
+  };
+  const { response, isLoading, error, execute } = usePost({
+    url,
+    body: formData,
+    ...METHODS[FormMethod],
+  });
 
   /**
    * Sends form data to backend
    */
-  async function sendFormData() {
-    let url = new URL(ENDPOINTS.LOCAL_URL);
-    setIsLoading(true);
-
-    if (FormMethod !== "POST") url.pathname = `/users/${user._id}`;
-    const { firstName, lastName, email } = user;
-    const formData = {
-      firstName,
-      lastName,
-      email,
-    };
-    const requestOptions = {
-      ...METHODS[FormMethod],
-      body: JSON.stringify(formData),
-    };
-
-    try {
-      const res = await fetch(url, requestOptions);
-      const { statusCode, message } = await res.json();
-      // Code for conflict in server, only email field can cause DB conflict
-      if (statusCode === 409) {
-        dispatch(updateFormErrorField({ field: "email", value: message }));
-      } else {
-        dispatch(clearForm());
-        navigator("/");
-      }
-    } catch (err) {
-      setServiceError((err as Error).message);
-    } finally {
-      setIsLoading(false);
-    }
+  function sendFormData() {
+    execute();
   }
+
+  /**
+   * Handle redirect or error message display once results are received
+   */
+  useEffect(() => {
+    if (response?.ok) {
+      dispatch(clearForm());
+      navigator("/");
+    } else {
+      if (response?.status === 409) {
+        dispatch(
+          updateFormErrorField({ field: "email", value: error?.message || "" })
+        );
+      } else serviceError.current.value = error?.message || "";
+    }
+  }, [response, error, dispatch, navigator]);
 
   return (
     <UserForm
       data={{
-        serviceError,
+        serviceError: serviceError.current.value,
         isLoading,
         title: FormMethod === "POST" ? "Add User" : "Edit User",
       }}

@@ -23,7 +23,8 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Query {
-  users: [UserGQL!]!
+  count(search: String!): Float!
+  users(page: Int! = 0, size: Int! = 5, sortBy: String!, order: String!, search: String!): [UserGQL!]!
 }
 
 type Mutation {

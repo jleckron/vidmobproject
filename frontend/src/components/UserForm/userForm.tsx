@@ -104,8 +104,6 @@ const UserForm = (props: IUserForm) => {
           helperText={formErrors.email}
         />
 
-        <Typography color="error">{serviceError}</Typography>
-
         <Box mt={2}>
           <Link to="/">
             <Button
@@ -125,11 +123,12 @@ const UserForm = (props: IUserForm) => {
             type="submit"
             variant="contained"
             color="primary"
-            disabled={!checkFormCompleteNoError()}
+            disabled={!checkFormCompleteNoError() || serviceError.length > 0}
           >
             Submit
           </LoadingButton>
         </Box>
+        <Typography color="error">{serviceError}</Typography>
       </form>
     </Box>
   );

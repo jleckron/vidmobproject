@@ -41,7 +41,7 @@ describe("DeleteUserButton", () => {
     expect(openedModal).toBeInTheDocument();
 
     // Verify the modal content
-    const modalTitle = screen.getByText("Delete John Doe");
+    const modalTitle = screen.getByText("Delete John Doe?");
     expect(modalTitle).toBeInTheDocument();
   });
 
