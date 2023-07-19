@@ -1,6 +1,9 @@
 const METHODS = {
   GET: {
     method: "GET",
+    headers: {
+      "Content-Type": "Application/json",
+    },
   },
   POST: {
     method: "POST",

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { ChangeEvent, FormEvent, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
@@ -9,24 +9,18 @@ import ENDPOINTS from "../../utils/constants/endpoints";
 import {
   clearForm,
   updateFormErrorField,
+  updateUserField,
 } from "../../redux/slices/userFormSlice";
 import { usePost } from "../../hooks/useFetch";
 
 const UserFormContainer = () => {
   const navigator = useNavigate();
-  const route = useLocation();
 
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.userForm);
-
-  const FormMethod = route.state?.edit ? "PUT" : "POST";
-
-  if (FormMethod === "PUT" && user._id === 0) {
-    dispatch(clearForm());
-    navigator("/");
-  }
-
   const serviceError = useRef({ value: "" });
+
+  const FormMethod = user._id !== 0 ? "PUT" : "POST";
 
   let url = new URL(ENDPOINTS.LOCAL_URL);
 
@@ -44,19 +38,12 @@ const UserFormContainer = () => {
   });
 
   /**
-   * Sends form data to backend
-   */
-  function sendFormData() {
-    execute();
-  }
-
-  /**
    * Handle redirect or error message display once results are received
    */
   useEffect(() => {
     if (response?.ok) {
-      dispatch(clearForm());
       navigator("/");
+      dispatch(clearForm());
     } else {
       if (response?.status === 409) {
         dispatch(
@@ -73,17 +60,25 @@ const UserFormContainer = () => {
         isLoading,
         title: FormMethod === "POST" ? "Add User" : "Edit User",
       }}
-      handleSubmit={handleSubmit}
+      handleOnChange={handleOnChange}
+      handleOnCancel={handleOnCancel}
+      handleOnSubmit={handleOnSubmit}
     />
   );
 
   /**
-   * Handles events when form is submitted
-   * @param event
+   * Form handler helper functions
    */
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleOnCancel() {
+    dispatch(clearForm());
+  }
+  function handleOnSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    sendFormData();
+    execute();
+  }
+  function handleOnChange(event: ChangeEvent<HTMLInputElement>) {
+    const field = event.target.id;
+    dispatch(updateUserField({ field, value: event.target.value }));
   }
 };
 

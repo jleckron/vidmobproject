@@ -90,7 +90,7 @@ const DeleteUserButton = (props: IDeleteUser) => {
               <span>Delete</span>
             </LoadingButton>
             {error && (
-              <Typography color="error">Error deleting user </Typography>
+              <Typography color="error">Error Deleting User</Typography>
             )}
           </Box>
         </Box>
@@ -99,8 +99,9 @@ const DeleteUserButton = (props: IDeleteUser) => {
         onClick={handleModal}
         sx={{ "&:hover": { color: "#d32f2f" } }}
         role="button"
+        name="deleteIcon"
       >
-        <Delete />
+        <Delete name="findme" />
       </IconButton>
     </>
   );

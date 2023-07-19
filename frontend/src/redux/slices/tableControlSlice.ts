@@ -20,6 +20,7 @@ export const tableControlSlice = createSlice({
     },
     setSortColumn(state, action) {
       state.sortBy = action.payload;
+      state.page = 0;
     },
     setSortOrder(state, action) {
       state.order = action.payload;

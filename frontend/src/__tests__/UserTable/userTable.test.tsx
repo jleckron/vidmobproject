@@ -4,35 +4,45 @@ import configureStore from "redux-mock-store";
 import UserTable from "../../components/UserTable/userTable";
 
 import { tableControlSlice } from "../../redux/slices/tableControlSlice";
+import { userFormSlice } from "../../redux/slices/userFormSlice";
+import { RootState } from "../../redux/store";
 const tableControlInitialState = tableControlSlice.getInitialState();
+const userFormInitialState = userFormSlice.getInitialState();
 
 describe("UserTable", () => {
-  const mockStore = configureStore([]);
-  const initialState = {
+  const mockStore = configureStore<RootState>([]);
+  const initialState: RootState = {
     tableControl: {
       ...tableControlInitialState,
     },
+    userForm: {
+      ...userFormInitialState,
+    },
   };
-  let store;
+  let store: ReturnType<typeof mockStore>;
 
   const mockData = {
     users: [
       {
+        _id: 1,
         firstName: "John",
         lastName: "Doe",
         email: "john@example.com",
         createdAt: "2023-06-12T18:26:55.320+00:00",
+        updatedAt: "2023-06-12T18:26:55.320+00:00",
       },
       {
+        _id: 2,
         firstName: "Jane",
         lastName: "Doe",
         email: "jane@example.com",
         createdAt: "2023-06-13T17:16:32.820+00:00",
+        updatedAt: "2023-06-13T17:16:32.820+00:00",
       },
     ],
-    error: "",
+    error: null,
     isLoading: false,
-    recordCount: 2,
+    count: 2,
   };
 
   const mockComponents = [jest.fn(), jest.fn()];
@@ -41,7 +51,7 @@ describe("UserTable", () => {
     store = mockStore(initialState);
   });
 
-  test("renders UserTable wrapped in Provider and receives data from Redux store", () => {
+  test("renders UserTable wrapped in Provider and receives table control data from Redux store", () => {
     render(
       <Provider store={store}>
         <UserTable data={mockData} components={mockComponents} />
@@ -70,9 +80,9 @@ describe("UserTable", () => {
   test("renders loading placeholder when isLoading is true", () => {
     const loadingData = {
       users: [],
-      error: "",
+      error: null,
       isLoading: true,
-      recordCount: 0,
+      count: 0,
     };
 
     render(
@@ -89,9 +99,9 @@ describe("UserTable", () => {
   test("renders error placeholder when error is present", () => {
     const errorData = {
       users: [],
-      error: "Some error message",
+      error: new Error("Some error"),
       isLoading: false,
-      recordCount: 0,
+      count: 0,
     };
 
     render(
@@ -108,9 +118,9 @@ describe("UserTable", () => {
   test("renders no user placeholder when users array is empty", () => {
     const emptyUsersData = {
       users: [],
-      error: "",
+      error: null,
       isLoading: false,
-      recordCount: 0,
+      count: 0,
     };
 
     render(

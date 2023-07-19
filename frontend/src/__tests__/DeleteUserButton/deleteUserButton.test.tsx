@@ -3,17 +3,32 @@ import { Provider } from "react-redux";
 import configureStore from "redux-mock-store";
 import DeleteUserButton from "../../components/UserTable/UserFunctions/DeleteUserButton";
 
+import { tableControlSlice } from "../../redux/slices/tableControlSlice";
+import { userFormSlice } from "../../redux/slices/userFormSlice";
+import { RootState } from "../../redux/store";
+const tableControlInitialState = tableControlSlice.getInitialState();
+const userFormInitialState = userFormSlice.getInitialState();
+
 describe("DeleteUserButton", () => {
-  const mockStore = configureStore([]);
-  const initialState = {
-    // Add relevant initial state properties for your Redux store
+  const mockStore = configureStore<RootState>([]);
+  const initialState: RootState = {
+    tableControl: {
+      ...tableControlInitialState,
+    },
+    userForm: {
+      ...userFormInitialState,
+    },
   };
-  let store;
+  let store: ReturnType<typeof mockStore>;
   const mockUser = {
     _id: 1,
     firstName: "John",
     lastName: "Doe",
+    email: "johndoe@example.com",
+    createdAt: "2023-06-12T18:26:55.320+00:00",
+    updatedAt: "2023-06-12T18:26:55.320+00:00",
   };
+
   beforeEach(() => {
     store = mockStore(initialState);
   });
@@ -45,7 +60,7 @@ describe("DeleteUserButton", () => {
     expect(modalTitle).toBeInTheDocument();
   });
 
-  test("dispatches toggleShouldReload and handles deletion when Delete button is clicked", () => {
+  test("dispatches toggleShouldReload and handles deletion when Delete button is clicked", async () => {
     const mockToggleShouldReload = jest.fn();
 
     render(
@@ -55,7 +70,7 @@ describe("DeleteUserButton", () => {
     );
 
     // Simulate button click to open the modal
-    const deleteUserButton = screen.getByRole("button");
+    const deleteUserButton = await screen.findByRole("button", {});
     fireEvent.click(deleteUserButton);
 
     // Simulate button click to delete the user

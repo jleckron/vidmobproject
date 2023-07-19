@@ -5,8 +5,7 @@ import { LoadingButton } from "@mui/lab";
 
 import { Link } from "react-router-dom";
 
-import { clearForm, updateUserField } from "../../redux/slices/userFormSlice";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useAppSelector } from "../../redux/hooks";
 
 interface IUserForm {
   data: {
@@ -14,15 +13,16 @@ interface IUserForm {
     isLoading: boolean;
     title: "Add User" | "Edit User";
   };
-  handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleOnCancel: () => void;
+  handleOnChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  handleOnSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
 
 const UserForm = (props: IUserForm) => {
-  const { data, handleSubmit } = props;
+  const { data, handleOnCancel, handleOnChange, handleOnSubmit } = props;
   const { serviceError, isLoading, title } = data;
 
   const { user, formErrors } = useAppSelector((state) => state.userForm);
-  const dispatch = useAppDispatch();
 
   const style = {
     position: "absolute" as "absolute",
@@ -50,19 +50,10 @@ const UserForm = (props: IUserForm) => {
     );
   };
 
-  const handleOnChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const field = event.target.id;
-    dispatch(updateUserField({ field, value: event.target.value }));
-  };
-
-  const handleCancel = () => {
-    dispatch(clearForm());
-  };
-
   return (
     <Box sx={style}>
       <Typography variant="h3">{title}</Typography>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleOnSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <TextField
@@ -107,7 +98,7 @@ const UserForm = (props: IUserForm) => {
         <Box mt={2}>
           <Link to="/">
             <Button
-              onClick={handleCancel}
+              onClick={handleOnCancel}
               type="button"
               variant="outlined"
               color="primary"
@@ -135,4 +126,3 @@ const UserForm = (props: IUserForm) => {
 };
 
 export default UserForm;
-export type { IUserForm };

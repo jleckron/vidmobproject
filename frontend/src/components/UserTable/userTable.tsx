@@ -22,6 +22,10 @@ import {
   CircularProgress,
   TableSortLabel,
   Box,
+  Pagination,
+  Select,
+  SelectChangeEvent,
+  MenuItem,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 
@@ -38,9 +42,9 @@ type Order = "asc" | "desc";
 const headCells = [
   { label: "First Name", id: "firstName", width: "20%" },
   { label: "Last Name", id: "lastName", width: "20%" },
-  { label: "Email", id: "email", width: "24%" },
+  { label: "Email", id: "email", width: "27%" },
   { label: "Date Created", id: "createdAt", width: "18%" },
-  { label: "", id: "", width: "18%" },
+  { label: "", id: "", width: "15%" },
 ];
 
 const UserTable = (props: IUserTable) => {
@@ -72,6 +76,10 @@ const UserTable = (props: IUserTable) => {
   const ErrorPlaceholder = () => messagePlaceholder("Error getting users");
   const NoUserPlaceholder = () => messagePlaceholder("No Users");
   const LoadingPlaceholder = () => messagePlaceholder(<CircularProgress />);
+
+  //Have page be 0 while api returns new count - clears error
+  const countParam = count || 0;
+  const pageParam = countParam === 0 ? 0 : page;
 
   return (
     <TableContainer component={Paper}>
@@ -117,13 +125,24 @@ const UserTable = (props: IUserTable) => {
         <TableFooter>
           <TableRow>
             <TablePagination
-              count={count}
-              page={page}
+              count={countParam}
+              page={pageParam}
               rowsPerPage={size}
               rowsPerPageOptions={[5, 10, 20, 50]}
               onPageChange={dispatchPageUpdate}
               onRowsPerPageChange={dispatchSizeUpdate}
             />
+            {/* <Select label="Rows" value={size} onChange={dispatchSizeUpdate}>
+              <MenuItem value={5}>5</MenuItem>
+              <MenuItem value={10}>10</MenuItem>
+              <MenuItem value={20}>20</MenuItem>
+              <MenuItem value={50}>50</MenuItem>
+            </Select>
+            <Pagination
+              count={Math.floor(countParam / size)}
+              page={pageParam}
+              onChange={dispatchPageUpdate}
+            /> */}
           </TableRow>
         </TableFooter>
       </Table>
@@ -136,7 +155,7 @@ const UserTable = (props: IUserTable) => {
    * @param page
    */
   function dispatchPageUpdate(
-    _event: MouseEvent<HTMLButtonElement> | null,
+    _event: ChangeEvent<unknown> | null,
     page: number
   ) {
     dispatch(setPage(page));
@@ -198,4 +217,3 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 export default UserTable;
-export type { IUserTable };

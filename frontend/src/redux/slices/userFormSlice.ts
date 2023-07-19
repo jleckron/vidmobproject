@@ -37,13 +37,13 @@ export const userFormSlice = createSlice({
           newError = !value.match(
             /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-]*$/
           )
-            ? "Invalid entry"
+            ? "Invalid Email"
             : "";
           break;
         }
         //matches first and last name against regex of only letters
         default: {
-          newError = !value.match(/^[A-Za-z']+$/) ? "Invalid Entry" : "";
+          newError = !value.match(/^[A-Za-z']+$/) ? "Invalid Name" : "";
         }
       }
       state.formErrors = { ...state.formErrors, [field]: newError };

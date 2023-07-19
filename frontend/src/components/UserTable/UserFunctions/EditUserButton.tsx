@@ -16,7 +16,7 @@ const EditUserButton = (props: IEditUser) => {
 
   const navigator = useNavigate();
   const handleClick = () => {
-    navigator("/form", { state: { edit: true } });
+    navigator("/form");
     dispatch(setUser(user));
   };
 

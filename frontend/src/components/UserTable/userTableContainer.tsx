@@ -13,13 +13,13 @@ import Add from "@mui/icons-material/Add";
 
 import UserTable from "./userTable";
 
-import METHODS from "../../utils/constants/methods";
 import ENDPOINTS from "../../utils/constants/endpoints";
 import SearchField from "../SearchField";
 
 import EditUserButton from "./UserFunctions/EditUserButton";
 import DeleteUserButton from "./UserFunctions/DeleteUserButton";
 import { useGet } from "../../hooks/useFetch";
+import METHODS from "../../utils/constants/methods";
 // import { MoreHoriz } from "@mui/icons-material";
 
 const UserTableContainer = () => {
@@ -83,44 +83,41 @@ const UserTableContainer = () => {
     }
   `;
 
-  const GQL_Data = useApolloQuery(GQL_USERS, {
-    variables: {
-      size: tableControl.size,
-      page: tableControl.page,
-      search: tableControl.searchParameter,
-      sortBy: tableControl.sortBy,
-      order: tableControl.order,
-    },
-  });
+  // const GQL_Data = useApolloQuery(GQL_USERS, {
+  //   variables: {
+  //     size: tableControl.size,
+  //     page: tableControl.page,
+  //     search: tableControl.searchParameter,
+  //     sortBy: tableControl.sortBy,
+  //     order: tableControl.order,
+  //   },
+  // });
 
-  const GQL_tableprops = {
-    users: GQL_Data.data?.users,
-    count: GQL_Data.data?.count || 0,
-    isLoading: GQL_Data.loading,
-    error: GQL_Data.error as Error,
-  };
+  // const GQL_tableprops = {
+  //   users: GQL_Data?.data?.users,
+  //   count: GQL_Data?.data?.count || 0,
+  //   isLoading: GQL_Data?.loading,
+  //   error: GQL_Data?.error as Error,
+  // };
   /**
    * End of GraphQL setup
    */
 
   /**
    * Update response data in hook when table control is changed
+   *
+   * Uncomment 'execute()' to send REST requests
    */
   useEffect(() => {
-    // execute();
+    const abortController = new AbortController();
+    execute(abortController);
+
+    return () => {
+      abortController.abort();
+    };
   }, [tableControl]);
 
-  // const theme = createTheme({
-  //   palette: {
-  //     primary: {
-  //       main: "#022cc3",
-  //     },
-  //   },
-  // });
-  // const styling = {
-  //   backgroundColor: theme.palette.primary.main,
-  // };
-
+  // PASS 'tableProps' to data to use REST endpoint
   return (
     <>
       <Box
@@ -137,13 +134,13 @@ const UserTableContainer = () => {
             startIcon={<Add />}
             // sx={styling}
           >
-            Add User
+            {"ADD USER"}
           </Button>
         </Link>
         <SearchField />
       </Box>
       <UserTable
-        data={GQL_tableprops}
+        data={tableProps}
         components={[EditUserButton, DeleteUserButton]}
       />
     </>
@@ -151,3 +148,14 @@ const UserTableContainer = () => {
 };
 
 export default UserTableContainer;
+
+// const theme = createTheme({
+//   palette: {
+//     primary: {
+//       main: "#022cc3",
+//     },
+//   },
+// });
+// const styling = {
+//   backgroundColor: theme.palette.primary.main,
+// };
