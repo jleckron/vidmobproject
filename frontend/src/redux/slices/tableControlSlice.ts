@@ -27,6 +27,7 @@ export const tableControlSlice = createSlice({
     },
     updateSearch(state, action) {
       state.searchParameter = action.payload;
+      state.page = 0;
     },
     toggleShouldReload(state) {
       state.shouldReload = !state.shouldReload;
