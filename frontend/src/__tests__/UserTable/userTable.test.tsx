@@ -51,7 +51,7 @@ describe("UserTable", () => {
     store = mockStore(initialState);
   });
 
-  test("renders UserTable wrapped in Provider and receives table control data from Redux store", () => {
+  test("renders UserTable receives table control data from Redux store", () => {
     render(
       <Provider store={store}>
         <UserTable data={mockData} components={mockComponents} />

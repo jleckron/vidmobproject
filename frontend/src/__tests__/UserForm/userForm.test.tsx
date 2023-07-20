@@ -138,7 +138,7 @@ describe("UserForm", () => {
     expect(mockHandleOnCancel).toHaveBeenCalledTimes(1);
   });
 
-  test("handles input field change", () => {
+  test("handles onchange function called on input field change", () => {
     const mockData: TMockData = {
       serviceError: "",
       isLoading: false,
@@ -212,22 +212,17 @@ describe("UserForm", () => {
     expect(emailDisplay).toBeInTheDocument();
   });
 
-  test("Submit button success when all fields valid", () => {
+  test("Submit button success when all fields valid and no error", () => {
     const storeWithData = mockStore({
       ...initialState,
       userForm: { ...mockFullForm },
     });
-    const editUserData: TMockData = {
-      serviceError: "",
-      isLoading: false,
-      title: "Edit User",
-    };
 
     render(
       <Provider store={storeWithData}>
         <BrowserRouter>
           <UserForm
-            data={editUserData}
+            data={mockData}
             handleOnCancel={mockHandleOnCancel}
             handleOnChange={mockHandleOnChange}
             handleOnSubmit={mockHandleOnSubmit}
@@ -257,17 +252,12 @@ describe("UserForm", () => {
       ...initialState,
       userForm: { ...mockFormWithErrors },
     });
-    const editUserData: TMockData = {
-      serviceError: "",
-      isLoading: false,
-      title: "Edit User",
-    };
 
     render(
       <Provider store={storeWithFormErrorData}>
         <BrowserRouter>
           <UserForm
-            data={editUserData}
+            data={mockData}
             handleOnCancel={mockHandleOnCancel}
             handleOnChange={mockHandleOnChange}
             handleOnSubmit={mockHandleOnSubmit}
@@ -284,33 +274,66 @@ describe("UserForm", () => {
     expect(mockHandleOnSubmit).toHaveBeenCalledTimes(0);
   });
 
-  // test("handles incorrect first name errors", () => {
-  //   const mockData = {
-  //     serviceError: "",
-  //     isLoading: false,
-  //     title: "Add User",
-  //   };
+  test("LoadingButton displays correctly when isLoading true", () => {
+    const storeWithData = mockStore({
+      ...initialState,
+      userForm: { ...mockFullForm },
+    });
+    const loadingData: TMockData = {
+      serviceError: "",
+      isLoading: true,
+      title: "Add User",
+    };
+    render(
+      <Provider store={storeWithData}>
+        <BrowserRouter>
+          <UserForm
+            data={loadingData}
+            handleOnCancel={mockHandleOnCancel}
+            handleOnChange={mockHandleOnChange}
+            handleOnSubmit={mockHandleOnSubmit}
+          />
+        </BrowserRouter>
+      </Provider>
+    );
 
-  //   render(
-  //     <Provider store={store}>
-  //       <BrowserRouter>
-  //         <UserForm data={mockData} handleSubmit={mockHandleSubmit} />
-  //       </BrowserRouter>
-  //     </Provider>
-  //   );
+    // Verify that LoadingButton is rendered
+    const circularProgress = screen.getByRole("progressbar");
+    expect(circularProgress).toBeInTheDocument();
+  });
 
-  //   // Simulate input field change
-  //   const firstNameInput = screen.getByLabelText("First Name *");
-  //   fireEvent.change(firstNameInput, { target: { value: "John5" } });
+  test("correctly displays error text for bad input", () => {
+    const mockFormWithErrors = {
+      ...mockFullForm,
+      formErrors: {
+        firstName: "Invalid Name",
+        lastName: "Invalid Name",
+        email: "Invalid Email",
+      },
+    };
+    const storeWithFormErrorData = mockStore({
+      ...initialState,
+      userForm: { ...mockFormWithErrors },
+    });
 
-  //   // Verify that updateUserField action is dispatched
-  //   const actions = store.getActions();
-  //   expect(actions).toContainEqual(
-  //     updateUserField({ field: "firstName", value: "John5" })
-  //   );
+    render(
+      <Provider store={storeWithFormErrorData}>
+        <BrowserRouter>
+          <UserForm
+            data={mockData}
+            handleOnCancel={mockHandleOnCancel}
+            handleOnChange={mockHandleOnChange}
+            handleOnSubmit={mockHandleOnSubmit}
+          />
+        </BrowserRouter>
+      </Provider>
+    );
 
-  //   const invalidFlag = screen.getAllByDisplayValue("firstName-helper-text");
-  //   expect(invalidFlag).toBeInTheDocument();
-  // });
+    const invalidNames = screen.getAllByText("Invalid Name");
+    expect(invalidNames).toHaveLength(2);
+
+    const invalidEmail = screen.getAllByText("Invalid Email");
+    expect(invalidEmail).toHaveLength(1);
+  });
   // Add more test cases if needed
 });

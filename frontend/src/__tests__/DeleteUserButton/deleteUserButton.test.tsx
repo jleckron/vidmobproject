@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { Provider } from "react-redux";
 import configureStore from "redux-mock-store";
 import DeleteUserButton from "../../components/UserTable/UserFunctions/DeleteUserButton";
+import * as UseFetchModule from "../../hooks/useFetch";
 
 import { tableControlSlice } from "../../redux/slices/tableControlSlice";
 import { userFormSlice } from "../../redux/slices/userFormSlice";
@@ -29,7 +30,7 @@ describe("DeleteUserButton", () => {
     updatedAt: "2023-06-12T18:26:55.320+00:00",
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     store = mockStore(initialState);
   });
 
@@ -80,6 +81,57 @@ describe("DeleteUserButton", () => {
 
     // Verify that toggleShouldReload action is dispatched
     expect(mockToggleShouldReload).toHaveBeenCalledTimes(1);
+  });
+
+  test("correctly displays error message if error exists", async () => {
+    const mockResponse = {
+      data: { users: [], count: 0 },
+      error: new Error(),
+      response: new Response(),
+      isLoading: false,
+      execute: jest.fn(),
+    };
+
+    jest.spyOn(UseFetchModule, "usePost").mockReturnValue(mockResponse);
+
+    render(
+      <Provider store={store}>
+        <DeleteUserButton user={mockUser} />
+      </Provider>
+    );
+
+    // Simulate button click to open the modal
+    const deleteUserButton = await screen.findByRole("button", {});
+    fireEvent.click(deleteUserButton);
+
+    // Verify Error text is shown when error returned by usePost
+    const errorText = screen.getByText("Error Deleting User");
+    expect(errorText).toBeInTheDocument();
+  });
+
+  test("LoadingButton displays correctly when isLoading true", async () => {
+    const mockResponse = {
+      data: { users: [], count: 0 },
+      error: new Error(),
+      response: new Response(),
+      isLoading: true,
+      execute: jest.fn(),
+    };
+
+    jest.spyOn(UseFetchModule, "usePost").mockReturnValue(mockResponse);
+
+    render(
+      <Provider store={store}>
+        <DeleteUserButton user={mockUser} />
+      </Provider>
+    );
+    // Simulate button click to open the modal
+    const deleteUserButton = await screen.findByRole("button", {});
+    fireEvent.click(deleteUserButton);
+
+    // Verify that LoadingButton is rendered
+    const circularProgress = screen.getByRole("progressbar");
+    expect(circularProgress).toBeInTheDocument();
   });
 
   // Add more test cases if needed

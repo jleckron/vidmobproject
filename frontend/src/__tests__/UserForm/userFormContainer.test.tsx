@@ -77,7 +77,7 @@ describe("UserFormContainer", () => {
     expect(title).toBeInTheDocument();
   });
 
-  test("calls handleOnCancel correctly when cancel button is clicked", () => {
+  test("verify handleOnCancel performs correct redux action - clearForm", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
@@ -95,7 +95,7 @@ describe("UserFormContainer", () => {
     expect(actions).toEqual([{ type: clearForm.type }]);
   });
 
-  test("calls handleOnChange correctly when input values change", () => {
+  test("verify handleOnChange performs correct redux action - updateuserfield", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
